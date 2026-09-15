@@ -97,11 +97,11 @@ class UDADecorator(BaseSegmentor):
     
     def simple_test_feature(self, img, img_meta, rescale=True):
         """Simple test with single image."""
-        return self.get_model().simple_test_feature(img, img_meta, rescale)#
+        return self.get_model().simple_test_feature(img, img_meta, rescale)
     
-    def simple_test_feature_dual(self, img, img_meta, rescale=True):#is this necessary?
+    def simple_test_feature_dual(self, img, img_meta, rescale=True):
         """Simple test with single image."""
-        return self.get_dual_model().simple_test_feature(img, img_meta, rescale)#
+        return self.get_dual_model().simple_test_feature(img, img_meta, rescale)
 
     def aug_test(self, imgs, img_metas, rescale=True):
         """Test with augmentations.
