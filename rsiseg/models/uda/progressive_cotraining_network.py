@@ -491,14 +491,6 @@ class Progressive_Cotraining_Network(UDADecorator):
         mix_losses_t_org, mix_log_vars_t_org = self._parse_losses(mix_losses_t_org)#
         log_vars.update(mix_log_vars_t_org)#
         total_loss2 += 2*(mix_losses_t+mix_losses_t_org)
-        if self.apply_ensemble == True:
-            ensemble_logits = self.ensemble_weight(torch.stack([mixed_logits.detach(), mixed_logits_t.detach()]))#why detach the mixed_logits
-            ensemble_loss=self.G_semantic_loss(ensemble_logits,F.interpolate(mixed_lbl.float(),size=(64,64),mode="nearest").squeeze().long())# to test whether this format suitable
-            total_loss2 += 2*ensemble_loss
-        else:
-            total_loss2 += 2*(mix_losses_t+mix_losses_t_org)#the loss is significant
-            target_loss=self.G_semantic_loss(tar_logits, F.interpolate(gt_semantic_seg.float(),size=(64,64),mode="nearest").squeeze().long())
-            total_loss2 += ((2*target_loss))
         
         tensors = dict(
             img_src=img,
