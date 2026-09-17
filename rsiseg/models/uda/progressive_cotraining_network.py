@@ -315,10 +315,9 @@ class Progressive_Cotraining_Network(UDADecorator):
         if self.local_iter>=4000:#4000
             with torch.no_grad():
                 feat_img_copy=self.vgg_pretrained(img_copy)
-                feat_fake_t=self.vgg_pretrained(fake_t)
-                class_center_fake_t = class_center_cal_with_external_selection_org(feat_fake_t, comb_logits.detach().argmax(axis=1).unsqueeze(axis=1), selection_mask=entropy_weight_m, num_classes=self.num_classes)
                 align_class_center_source = class_center_cal1(feat_img_copy, gt_semantic_seg, num_classes=self.num_classes)
-    
+            feat_fake_t=self.vgg_pretrained(fake_t)
+            class_center_fake_t = class_center_cal_with_external_selection_org(feat_fake_t, comb_logits.detach().argmax(axis=1).unsqueeze(axis=1), selection_mask=entropy_weight_m, num_classes=self.num_classes)
             diff_weight = [0.0002, 0.000018, 0.0000036]
             if isinstance(class_center_fake_t, list):
                 center_align_loss1 = 0
@@ -334,10 +333,10 @@ class Progressive_Cotraining_Network(UDADecorator):
                 center_align_loss1 = 0.1 * torch.pow(center_diff1, 2).sum()
             with torch.no_grad():
                 feat_target_img=self.vgg_pretrained(target_img_copy)
-                feat_fake_s=self.vgg_pretrained(fake_s)
-                class_center_fake_s = class_center_cal1(feat_fake_s, gt_semantic_seg, num_classes=self.num_classes) # t like
                 align_class_center_target = class_center_cal_with_external_selection_org(feat_target_img, comb_logits.detach().argmax(axis=1).unsqueeze(axis=1), selection_mask=entropy_weight_m, num_classes=self.num_classes)
-            # Handle tensor list inputs
+            feat_fake_s=self.vgg_pretrained(fake_s)
+            class_center_fake_s = class_center_cal1(feat_fake_s, gt_semantic_seg, num_classes=self.num_classes) # t like  
+          # Handle tensor list inputs
             if isinstance(class_center_fake_s, list):
                 center_align_loss2 = 0
                 i = 0
@@ -347,7 +346,7 @@ class Progressive_Cotraining_Network(UDADecorator):
                         center_align_loss2 = center_align_loss2 +  diff_weight[i] * torch.pow(diff, 2).sum()
                         i = i + 1
             else:
-                center_diff2 = class_center_fake_t - align_class_center_target.detach()
+                center_diff2 = class_center_fake_s - align_class_center_target.detach()
                 center_align_loss2 = 0.1 * torch.pow(center_diff2, 2).sum()
             total_loss += (center_align_loss1+center_align_loss2)
 
