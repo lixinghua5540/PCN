@@ -293,8 +293,7 @@ class Progressive_Cotraining_Network(UDADecorator):
         loss_ssim=2-self.ssim_loss(fake_t, target_img_copy)-self.ssim_loss(fake_s, img_copy)
 
         loss_cycle=self.criterionCycle(img_copy, rec_s)+self.criterionCycle(target_img_copy, rec_t)#or it can use half of the loss
-        nambda_ssim = 2 * (1-self.local_iter/80000)#
-        #nambda_ssim = 2.0 #
+        nambda_ssim = 1 * (1-self.local_iter/80000)#
         loss_generative = loss_cycle+nambda_ssim*loss_ssim
 
         if self.local_iter<40000:
@@ -318,7 +317,7 @@ class Progressive_Cotraining_Network(UDADecorator):
                 align_class_center_source = class_center_cal1(feat_img_copy, gt_semantic_seg, num_classes=self.num_classes)
             feat_fake_t=self.vgg_pretrained(fake_t)
             class_center_fake_t = class_center_cal_with_external_selection_org(feat_fake_t, comb_logits.detach().argmax(axis=1).unsqueeze(axis=1), selection_mask=entropy_weight_m, num_classes=self.num_classes)
-            diff_weight = [0.0002, 0.000018, 0.0000036]
+            diff_weight = [0.0001, 0.000009, 0.0000018]
             if isinstance(class_center_fake_t, list):
                 center_align_loss1 = 0
                 i = 0
@@ -489,8 +488,10 @@ class Progressive_Cotraining_Network(UDADecorator):
         mix_losses_t_org = add_prefix(mix_losses_t_org, 'mix_t_org')#
         mix_losses_t_org, mix_log_vars_t_org = self._parse_losses(mix_losses_t_org)#
         log_vars.update(mix_log_vars_t_org)#
-        total_loss2 += 2*(mix_losses_t+mix_losses_t_org)
-        
+        total_loss2 += (mix_losses_t+mix_losses_t_org)
+        if self.local_iter<40000:
+            target_loss=self.G_semantic_loss(tar_logits, F.interpolate(gt_semantic_seg.float(),size=(64,64),mode="nearest").squeeze().long())
+            total_loss2 += ((target_loss))
         tensors = dict(
             img_src=img,
             img_src_metas=img_metas,
