@@ -32,7 +32,7 @@ target_pipeline = [
          load_feats=False,
          pseudo_ratio=0.0),
     dict(type='Resize', img_scale=(576, 576), ratio_range=(0.5, 2.0)),
-    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
+    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=1.0),
     dict(type='RandomRotate90', prob=1.0),
     dict(type='RandomFlip', flip_ratio=0.5, direction='vertical'),
     dict(type='RandomFlip', flip_ratio=0.5, direction='horizontal'),
